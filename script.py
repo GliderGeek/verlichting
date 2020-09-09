@@ -7,6 +7,7 @@ from pathlib import Path
 
 england_gpx = Path(__file__).parent / 'verlichting_tracks' / 'Engeland2016.gpx'
 limfjord_gpx = Path(__file__).parent / 'verlichting_tracks' / 'Limfjord2018.gpx'
+wadden_gpx = Path(__file__).parent / 'verlichting_tracks' / '2020Wadden.gpx'
 
 class GPXSource:
 
@@ -50,6 +51,7 @@ trips = [
 	Trip('Dieppe 2017', [GPXSource(england_gpx, 61, 92)]),
 	Trip('Denemarken 2018', [GPXSource(england_gpx, 99), GPXSource(limfjord_gpx, 0, 37)]),
 	Trip('Kanaaleilanden 2019', [GPXSource(limfjord_gpx, 47, 109)]),
+	Trip('wadden2020', [GPXSource(wadden_gpx, 6, -1)]),
 ]
 
 
@@ -97,5 +99,5 @@ def write_trip_to_geojson(trip):
 
 
 
-# visualize_trips(trips)
-write_trip_to_geojson(trips[3])
+# visualize_trips([trips[-1]])
+write_trip_to_geojson(trips[-1])
