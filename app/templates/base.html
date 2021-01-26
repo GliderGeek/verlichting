@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Verlichting</title>
+	<link rel="stylesheet" type="text/css" href="/static/base_style.css">
+
+	{% block header %}
+	{% endblock %}
+
+</head>
+<body>
+
+<div class="home">Verlichting</div>
+<div class="divider"></div>
+<div class="navbar">
+	<a id="about" href="/schip/" style="color: {% if active_page == 'schip' %}white{% else %}black{% endif %};">Schip</a>
+	<a id="trips" href="/trips/" style="color: {% if active_page == 'trips' %}white{% else %}black{% endif %};">Trips</a>
+<!-- 	<a id="stories" href="/stories/" style="color: {% if active_page == 'stories' %}white{% else %}black{% endif %};">Stories</a> -->
+	<a id="location" href="/live/" style="color: {% if active_page == 'live' %}white{% else %}black{% endif %};">Live</a>
+</div>
+
+<div class="text">
+{% block text %}
+{% endblock %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+
+<!-- 	<line id="line1" x1="0" y1="0" x2="100" y2="200" style="stroke:black;stroke-width:14px;"/>
+	<line id="line2" x1="0" y1="0" x2="200" y2="200" style="stroke:black;stroke-width:14px;"/>
+	<line id="line3" x1="100" y1="200" x2="200" y2="200" style="stroke:black;stroke-width:14px;"/>
+ -->
+	<polygon points="10,210 210,10 110,210" stroke-linejoin="arcs" stroke="black"
+  style="fill:none;stroke-width:10;" />
+
+</svg>

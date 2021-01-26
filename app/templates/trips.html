@@ -1,22 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Trips</title>
-	<meta charset="utf-8" />
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h1>Overzicht</h1>
+{% block text %}
+<h1>Trips</h1>
 
-<table>
-	<tbody>
-		{% for trip in trips %}
-		<tr>
-			<td><a href="/trips/{{ trip['name'] }}">{{ trip['label'] }}</a></td>
-		</tr>
-		{% endfor %}
-	</tbody>
-</table>
-
-</body>
-</html>
+	<table>
+		<tbody>
+			{% for trip in trips %}
+			<tr>
+				<td><a href="/trips/{{ trip['name'] }}">{{ trip['label'] }}</a></td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

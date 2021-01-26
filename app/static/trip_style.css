@@ -1,0 +1,17 @@
+.itinerary { 
+  height: 500px;
+  width: 150px;
+  overflow-x: scroll;
+  display: inline-block;
+  align-content: right;
+}
+
+.map {
+  width: 540px;
+  height: 500px;
+  display: inline-block;
+}
+
+.slider {
+  width: 540px;
+}
