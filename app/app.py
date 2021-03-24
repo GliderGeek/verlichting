@@ -31,21 +31,25 @@ def query_db(query, args=(), one=False):
 def index():
     return redirect(url_for('schip'))
 
+
 @app.route('/schip/')
 def schip():
     return render_template('schip.html', active_page='schip')
+
 
 @app.route('/trips/')
 def trips():
     return render_template('trips.html', active_page='trips', trips=query_db('SELECT * FROM trips ORDER BY year DESC '))
 
+
 @app.route('/live/')
 def live():
     return render_template('live.html', active_page='live')
 
+
 @app.route('/trips/<trip_name>/')
 def trip(trip_name=None):
-    trips = query_db(f"SELECT * FROM trips WHERE name='{trip_name}'")
+    trips = query_db("SELECT * FROM trips WHERE name=?", (trip_name,))
     if len(trips) == 0:
         abort(404)
 
