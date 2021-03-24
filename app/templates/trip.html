@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+    <link rel="stylesheet" type="text/css" href="/static/trip_style.css">
+{% endblock %}
+
+
+{% block text %}
+<h1><a href="/trips/">Trips</a> / {{ trip_label }}</h1>
+
+<div id="mapid" class="map">tmp</div>
+
+<table class="itinerary">
+<tbody>
+  {% for stop in stops %}
+    <tr>
+      <td style="cursor:pointer;" id=stop{{ loop.index0 }} onclick="buttonPress({{ stop.index }});">{{ stop.name }}</td>
+    </tr>
+  {% endfor %}
+</tbody>
+</table>
+
+<input type="range" min="0" max="100" value="0" class="slider" id="myRange">
+
+<p id="outputNumber"></p>
+
+<script>
+
+	var mymap = L.map('mapid').setView([51.924, 4.470], 6);
+
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox/streets-v11',
+		tileSize: 512,
+		zoomOffset: -1
+	}).addTo(mymap);
+
+	var data = {"type": "LineString", "coordinates": {{ track_coordinates }}};
+
+	L.geoJSON(data).addTo(mymap);
+
+	var slider = document.getElementById("myRange");
+
+	slider.max = data["coordinates"].length;
+	
+	var mark = L.circleMarker([52, 4]);
+	mark.addTo(mymap);
+
+	function updateMarker(index){
+		var coords = data["coordinates"][index];
+		var nr = document.getElementById("outputNumber");
+	    // nr.innerHTML = index;
+
+	    var newLatLng = new L.LatLng(coords[1], coords[0]);
+	    mark.setLatLng(newLatLng);
+	};
+
+  var stops = {{ stop_indices }}
+
+  function updateList(index){
+
+    var found = false;
+    for (let i = 0; i < stops.length -1; i++){
+      previous_stop = stops[i];
+      next_stop = stops[i+1];
+
+      var element1 = document.getElementById('stop' + i.toString());
+      var element2 = document.getElementById('stop' + (i+1).toString());
+
+      if (found){
+        element2.style.fontWeight = 'normal';
+        continue
+      }
+
+      if (previous_stop < index && index < next_stop) {
+        element1.style.fontWeight = 'bold';
+        element2.style.fontWeight = 'bold';
+        found = true;
+      } else if (previous_stop == index) {
+        element2.style.fontWeight = 'normal'
+        element1.style.fontWeight = 'bold';
+      } else if (next_stop == index) {
+        element1.style.fontWeight = 'normal';
+        element2.style.fontWeight = 'bold';
+      } else {
+        element1.style.fontWeight = 'normal';
+        element2.style.fontWeight = 'normal';
+      }
+    }
+  }
+
+	function buttonPress(index){
+		slider.value = index;
+	  updateMarker(index);
+    updateList(index);
+  }
+
+	function sliderChange() {
+	  updateMarker(this.value);
+    updateList(this.value);
+	};
+
+	// Update the current slider value (each time you drag the slider handle)
+	slider.oninput = sliderChange;
+	buttonPress(0);
+
+</script>
+</body>
+{% endblock %}

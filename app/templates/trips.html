@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block text %}
+<h1>Trips</h1>
+
+	<table>
+		<tbody>
+			{% for trip in trips %}
+			<tr>
+				<td><a href="/trips/{{ trip['name'] }}">{{ trip['label'] }}</a></td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

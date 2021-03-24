@@ -1,4 +1,0 @@
-gpxpy==1.4.1
-pandas
-geojson
-plotly
