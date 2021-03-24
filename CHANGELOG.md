@@ -13,6 +13,7 @@ primarily used to distinguish released versions.
 ### Removed
 
 ### Fixed
+- remove trips.sqlite from gitignore and add in repo
 
 ### Security
 

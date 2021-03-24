@@ -1,6 +1,5 @@
 venv
 .DS_Store
-*.sqlite
 *.db
 .idea
 *.pyc
