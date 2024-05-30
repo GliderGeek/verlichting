@@ -1,0 +1,87 @@
+{% block text %}
+<h1>Repairs</h1>
+
+	Brand:
+	<input id="selected_brand" type="text" list="brands" />
+	<datalist id="brands">
+		{% for brand in brands %}
+		<tr>
+			<option value="{{ brand }}"></option>
+		</tr>
+		{% endfor %}
+	</datalist>
+
+	<br>
+
+	Model:
+	<input id="selected_model" type="text" list="models" />
+	<datalist id="models">
+		{% for model in models %}
+		<tr>
+			<option value="{{ model }}"></option>
+		</tr>
+		{% endfor %}
+	</datalist>
+
+	<br>
+
+	Kind of object:
+	<input id="selected_kind" type="text" list="product_kinds" />
+	<datalist id="product_kinds">
+		{% for kind in product_kinds %}
+		<tr>
+			<option value="{{ kind }}"></option>
+		</tr>
+		{% endfor %}
+	</datalist>
+
+	<br>
+
+<input id="clickMe" type="button" value="clickme" onclick="doFunction();" />
+
+<br>
+
+number of items found:
+<div id="items_found">0</div>
+
+<script>
+
+	async function x(brand, model, kind){
+	    console.log("inside x");
+
+		console.log(model)
+		console.log(kind)
+
+		var url = '/repairs/?brand=' + brand
+		if (model != ""){
+		  url = url + '&model=' + model
+		}
+		if (kind != ""){
+		  url = url + '&kind=' + kind
+		}
+
+	    const response = await fetch(url);
+		const myJson = await response.json(); //extract JSON from the http response
+		document.getElementById("items_found").textContent=myJson.number_of_results;
+		console.log("in here");
+
+	}
+
+	function doFunction(){
+		console.log("Clicked2");
+		var brand = document.getElementById("selected_brand").value
+		var model = document.getElementById("selected_model").value
+		var kind = document.getElementById("selected_kind").value
+
+		x(brand, model, kind).then(
+		  console.log("success"),
+		  console.log("error")
+		);
+
+
+	};
+
+
+</script>
+
+{% endblock %}
