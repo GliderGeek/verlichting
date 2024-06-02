@@ -84,28 +84,100 @@ def trip(trip_name=None):
     return render_template('trip.html', active_page='trips', **context)
 
 
+def filter(**kwargs):
+    filter_clause = ''
+    if len(kwargs) > 0:
+        first = True
+        for key, val in kwargs.items():
+            if first:
+                filter_clause = filter_clause + f"WHERE {key}='{val}'"
+                first = False
+                print('here1')
+            else:
+                filter_clause = filter_clause + f" AND {key}='{val}'"
+                print('here2')
+    return filter_clause
+
+
+@app.route('/brands/')
+def brands():
+
+    filters = {}
+    model = request.args.get('model')
+    kind_of_product = request.args.get('kind')
+    if model not in (None, ''):
+        filters['model'] = model
+    if kind_of_product not in (None, ''):
+        filters['kind_of_product'] = kind_of_product
+
+    query = f'SELECT DISTINCT brand FROM repairs {filter(**filters)} ORDER BY brand ASC '
+
+    print(query)
+
+    return [row['brand'] for row in query_repair_db(query)]
+
+
+@app.route('/models/')
+def models():
+
+    filters = {}
+    brand = request.args.get('brand')
+    kind_of_product = request.args.get('kind')
+    if brand not in (None, ''):
+        filters['brand'] = brand
+    if kind_of_product not in (None, ''):
+        filters['kind_of_product'] = kind_of_product
+
+    query = f'SELECT DISTINCT model FROM repairs {filter(**filters)} ORDER BY model ASC '
+
+    print('query:', query)
+
+    return [row['model'] for row in query_repair_db(query)]
+
+
+@app.route('/kinds/')
+def kinds():
+    filters = {}
+    brand = request.args.get('brand')
+    model = request.args.get('model')
+    if brand not in (None, ''):
+        filters['brand'] = brand
+    if model not in (None, ''):
+        filters['model'] = model
+
+    query = f'SELECT DISTINCT kind_of_product FROM repairs {filter(**filters)} ORDER BY kind_of_product ASC '
+    return [row['kind_of_product'] for row in query_repair_db(query)]
+
+
 @app.route('/repair/')
 def repair():
     brands = [row['brand'] for row in query_repair_db('SELECT DISTINCT brand FROM repairs ORDER BY brand ASC ')]
     models = [row['model'] for row in query_repair_db('SELECT DISTINCT model FROM repairs ORDER BY model ASC ')]
     product_kinds = [row['kind_of_product'] for row in query_repair_db('SELECT DISTINCT kind_of_product FROM repairs ORDER BY kind_of_product ASC ')]
+
+    # todo
+    # - resultaten echt tonen
+    # - is performance afhankelijke opties goed genoeg?
+
     return render_template('repair.html', brands=brands, models=models, product_kinds=product_kinds)
 
 
 @app.route('/repairs/')
 def repairs():
 
+    filters = {}
     brand = request.args.get('brand')
     model = request.args.get('model')
     kind_of_product = request.args.get('kind')
+    if brand not in (None, ''):
+        filters['brand'] = brand
+    if model not in (None, ''):
+        filters['model'] = model
+    if kind_of_product not in (None, ''):
+        filters['kind_of_product'] = kind_of_product
 
     # todo: address sql injection vuln
-    # todo: make such that brand is not required
-    query = f"SELECT COUNT(*) FROM repairs WHERE brand='{brand}'"
-    if model is not None:
-        query += f" AND model='{model}'"
-    if kind_of_product is not None:
-        query += f" AND kind_of_product='{kind_of_product}'"
+    query = f"SELECT COUNT(*) FROM repairs {filter(**filters)}"
 
     res = query_repair_db(query)
     number_of_results = (res[0]['COUNT(*)'])

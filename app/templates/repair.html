@@ -1,8 +1,120 @@
-{% block text %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script>
+
+	function setDataListOptions(dataList, newOptions){
+            var options = dataList.getElementsByTagName('option');
+            while (dataList.options.length > 0){
+              dataList.removeChild(options[0]);
+            }
+            newOptions.forEach(function(item){
+                var option = document.createElement('option');
+                option.value = item;
+                dataList.appendChild(option);
+            });
+        };
+
+	async function updateBrandList(){
+      var brandList = document.getElementById("brands")
+	  var model = document.getElementById("selected_model").value
+      var kind = document.getElementById("selected_kind").value
+
+      var url = '/brands/?model=' + model + '&kind=' + kind
+      const response = await fetch(url);
+      const brandOptions = await response.json(); //extract JSON from the http response-->
+      setDataListOptions(brandList, brandOptions);
+	};
+
+	async function updateModelList(){
+
+	  var brand = document.getElementById("selected_brand").value
+	  var modelList = document.getElementById("models")
+      var kind = document.getElementById("selected_kind").value
+
+      var url = '/models/?brand=' + brand + '&kind=' + kind
+      const response = await fetch(url);
+      const modelOptions = await response.json(); //extract JSON from the http response-->
+      setDataListOptions(modelList, modelOptions);
+	};
+
+	async function updateKindList(){
+
+	  var kindList = document.getElementById("product_kinds")
+      var brand = document.getElementById("selected_brand").value
+	  var model = document.getElementById("selected_model").value
+
+      var url = '/kinds/?brand=' + brand + '&model=' + model
+      const response = await fetch(url);
+      const kindOptions = await response.json(); //extract JSON from the http response-->
+      setDataListOptions(kindList, kindOptions);
+	};
+
+	async function setRepairCount(brand, model, kind){
+		var url = '/repairs/?brand=' + brand + '&model=' + model + '&kind=' + kind
+        const response = await fetch(url);
+        const repairs = await response.json(); //extract JSON from the http response-->
+		document.getElementById("items_found").textContent = repairs.number_of_results;
+	};
+
+	function onBrandSelect(){
+		updateModelList().then(
+			console.log("success"),
+			console.log("error"),
+		);
+		updateKindList().then(
+			console.log("success"),
+			console.log("error"),
+		);
+
+	};
+
+	function onModelSelect(){
+		updateBrandList().then(
+			console.log("success"),
+			console.log("error"),
+		);
+		updateKindList().then(
+			console.log("success"),
+			console.log("error"),
+		);
+	};
+
+	function onKindSelect(){
+		updateBrandList().then(
+			console.log("success"),
+			console.log("error"),
+		);
+		updateModelList().then(
+			console.log("success"),
+			console.log("error"),
+		);
+	};
+
+	function getRepairs(){
+		var brand = document.getElementById("selected_brand").value
+		var model = document.getElementById("selected_model").value
+		var kind = document.getElementById("selected_kind").value
+
+		setRepairCount(brand, model, kind).then(
+		    console.log("success"),
+		    console.log("error"),
+		);
+
+	};
+
+
+</script>
+</head>
+<body>
+
 <h1>Repairs</h1>
 
-	Brand:
-	<input id="selected_brand" type="text" list="brands" />
+	Brand: <br>
+	<input id="selected_brand" type="text" list="brands" onchange="onBrandSelect()"/>
 	<datalist id="brands">
 		{% for brand in brands %}
 		<tr>
@@ -13,75 +125,22 @@
 
 	<br>
 
-	Model:
-	<input id="selected_model" type="text" list="models" />
+	Model: <br>
+	<input id="selected_model" type="text" list="models" onchange="onModelSelect()"/>
 	<datalist id="models">
-		{% for model in models %}
-		<tr>
-			<option value="{{ model }}"></option>
-		</tr>
-		{% endfor %}
 	</datalist>
-
 	<br>
 
-	Kind of object:
-	<input id="selected_kind" type="text" list="product_kinds" />
+	Kind of object: <br>
+	<input id="selected_kind" type="text" list="product_kinds" onchange="onKindSelect()"/>
 	<datalist id="product_kinds">
-		{% for kind in product_kinds %}
-		<tr>
-			<option value="{{ kind }}"></option>
-		</tr>
-		{% endfor %}
 	</datalist>
 
 	<br>
+	<br>
 
-<input id="clickMe" type="button" value="clickme" onclick="doFunction();" />
+<input id="clickMe" type="button" value="clickme" onclick="getRepairs()" /><br>
 
 <br>
-
 number of items found:
 <div id="items_found">0</div>
-
-<script>
-
-	async function x(brand, model, kind){
-	    console.log("inside x");
-
-		console.log(model)
-		console.log(kind)
-
-		var url = '/repairs/?brand=' + brand
-		if (model != ""){
-		  url = url + '&model=' + model
-		}
-		if (kind != ""){
-		  url = url + '&kind=' + kind
-		}
-
-	    const response = await fetch(url);
-		const myJson = await response.json(); //extract JSON from the http response
-		document.getElementById("items_found").textContent=myJson.number_of_results;
-		console.log("in here");
-
-	}
-
-	function doFunction(){
-		console.log("Clicked2");
-		var brand = document.getElementById("selected_brand").value
-		var model = document.getElementById("selected_model").value
-		var kind = document.getElementById("selected_kind").value
-
-		x(brand, model, kind).then(
-		  console.log("success"),
-		  console.log("error")
-		);
-
-
-	};
-
-
-</script>
-
-{% endblock %}
