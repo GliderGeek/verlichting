@@ -181,4 +181,7 @@ def repairs():
 
     res = query_repair_db(query)
     number_of_results = (res[0]['COUNT(*)'])
-    return {'number_of_results': number_of_results}
+
+    first_ten_query = f"SELECT brand, model, kind_of_product FROM repairs {filter(**filters)} LIMIT 10"
+    results = [{'brand': row['brand'], 'model': row['model'], 'kind': row['kind_of_product']} for row in query_repair_db(first_ten_query)]
+    return {'number_of_results': number_of_results, 'page_size': 10, 'results': results}

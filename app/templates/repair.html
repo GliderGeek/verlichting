@@ -58,9 +58,31 @@
         const response = await fetch(url);
         const repairs = await response.json(); //extract JSON from the http response-->
 		document.getElementById("items_found").textContent = repairs.number_of_results;
+
+		var tbodyRef = document.getElementById('repairsTable').getElementsByTagName('tbody')[0];
+
+		tbodyRef.innerHTML = ''  //clear table
+
+		for (let rowNumber = 0; rowNumber < repairs.results.length; rowNumber++) {
+
+			var values = [repairs.results[rowNumber].brand, repairs.results[rowNumber].model, repairs.results[rowNumber].kind]
+
+			var newRow = tbodyRef.insertRow();  // Insert a row at the end of table
+
+			for(let column = 0; column < 3; column++){
+				var newCell = newRow.insertCell();                        // Insert a cell at the end of the row
+				var newText = document.createTextNode(values[column]);    // Append a text node to the cell
+				newCell.appendChild(newText);
+			}
+		}
+
+		var dummy = {"brand": "fooBrand", "model": "fooModel", "kind": "fooKind"}
+
 	};
 
 	function onBrandSelect(){
+
+		// todo: these "success" and "errors" are there to just wrap the asyn func. look into better way
 		updateModelList().then(
 			console.log("success"),
 			console.log("error"),
@@ -69,7 +91,6 @@
 			console.log("success"),
 			console.log("error"),
 		);
-
 	};
 
 	function onModelSelect(){
@@ -144,3 +165,20 @@
 <br>
 number of items found:
 <div id="items_found">0</div>
+
+<table id="repairsTable">
+	<thead>
+  <tr>
+    <th>Brand</th>
+    <th>Model</th>
+    <th>Kind of product</th>
+  </tr>
+  </thead>
+	<tbody>
+  <tr>
+    <td>Alfreds Futterkiste</td>
+    <td>Maria Anders</td>
+    <td>Germany</td>
+  </tr>
+	</tbody>
+</table>
