@@ -3,7 +3,7 @@ import sqlite3
 
 from pathlib import Path
 
-from flask import Flask, render_template, g, redirect, url_for, request
+from flask import Flask, render_template, g, redirect, url_for, request, jsonify
 from werkzeug.exceptions import abort
 
 app = Flask(__name__)
@@ -114,7 +114,7 @@ def brands():
 
     print(query)
 
-    return [row['brand'] for row in query_repair_db(query)]
+    return jsonify([row['brand'] for row in query_repair_db(query)])
 
 
 @app.route('/models/')
@@ -132,7 +132,7 @@ def models():
 
     print('query:', query)
 
-    return [row['model'] for row in query_repair_db(query)]
+    return jsonify([row['model'] for row in query_repair_db(query)])
 
 
 @app.route('/kinds/')
@@ -146,7 +146,7 @@ def kinds():
         filters['model'] = model
 
     query = f'SELECT DISTINCT kind_of_product FROM repairs {filter(**filters)} ORDER BY kind_of_product ASC '
-    return [row['kind_of_product'] for row in query_repair_db(query)]
+    return jsonify([row['kind_of_product'] for row in query_repair_db(query)])
 
 
 @app.route('/repair/')
