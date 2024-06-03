@@ -182,6 +182,34 @@ def repairs():
     res = query_repair_db(query)
     number_of_results = (res[0]['COUNT(*)'])
 
-    first_ten_query = f"SELECT brand, model, kind_of_product FROM repairs {filter(**filters)} LIMIT 10"
-    results = [{'brand': row['brand'], 'model': row['model'], 'kind': row['kind_of_product']} for row in query_repair_db(first_ten_query)]
+    first_ten_query = f"SELECT brand, model, kind_of_product, [Repair id] FROM repairs {filter(**filters)} LIMIT 10"
+    results = [{'brand': row['brand'],
+                'model': row['model'],
+                'kind': row['kind_of_product'],
+                'link': f"/repairs/{row['Repair id']}",
+                } for row in query_repair_db(first_ten_query)]
     return {'number_of_results': number_of_results, 'page_size': 10, 'results': results}
+
+
+def serialize_row(row):
+    return {
+        'brand': row['brand'],
+        'model': row['model'],
+        'kind': row['kind_of_product'],
+        'repair_status': row['Has the product been repaired?']
+    }
+
+
+@app.route('/repairs/<repair_id>')
+def repair_item(repair_id):
+    # todo: change into column name without space
+    query = f"SELECT * FROM repairs WHERE [Repair id]='{repair_id}'"
+    results = [row for row in query_repair_db(query)]
+
+    print(len(results))
+    if len(results) == 0:
+        return 'not found'
+    elif len(results) == 1:
+        return serialize_row(results[0])
+    else:
+        raise ValueError('multiple')

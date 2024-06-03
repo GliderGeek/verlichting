@@ -65,19 +65,30 @@
 
 		for (let rowNumber = 0; rowNumber < repairs.results.length; rowNumber++) {
 
-			var values = [repairs.results[rowNumber].brand, repairs.results[rowNumber].model, repairs.results[rowNumber].kind]
+			var values = [repairs.results[rowNumber].link, repairs.results[rowNumber].brand, repairs.results[rowNumber].model, repairs.results[rowNumber].kind]
 
 			var newRow = tbodyRef.insertRow();  // Insert a row at the end of table
 
-			for(let column = 0; column < 3; column++){
+			for(let column = 0; column < 4; column++){
 				var newCell = newRow.insertCell();                        // Insert a cell at the end of the row
-				var newText = document.createTextNode(values[column]);    // Append a text node to the cell
-				newCell.appendChild(newText);
+				if (column == 0){
+					var child = document.createElement('a');
+				    var linkText = document.createTextNode("link");
+				    child.appendChild(linkText);
+				    child.href = values[column];
+				} else {
+					var child = document.createTextNode(values[column]);    // Append a text node to the cell
+				}
+				newCell.appendChild(child);
 			}
 		}
+	};
 
-		var dummy = {"brand": "fooBrand", "model": "fooModel", "kind": "fooKind"}
-
+	async function triggerSingleRepair(){
+		var url = '/repairs/0418_2024_0511_240532'
+        const response = await fetch(url);
+        const repairs = await response.json(); //extract JSON from the http response-->
+        console.log(repairs);
 	};
 
 	function onBrandSelect(){
@@ -121,6 +132,11 @@
 		var kind = document.getElementById("selected_kind").value
 
 		setRepairCount(brand, model, kind).then(
+		    console.log("success"),
+		    console.log("error"),
+		);
+
+		triggerSingleRepair().then(
 		    console.log("success"),
 		    console.log("error"),
 		);
@@ -169,16 +185,12 @@ number of items found:
 <table id="repairsTable">
 	<thead>
   <tr>
-    <th>Brand</th>
+    <th>Link</th>
+	<th>Brand</th>
     <th>Model</th>
     <th>Kind of product</th>
   </tr>
   </thead>
 	<tbody>
-  <tr>
-    <td>Alfreds Futterkiste</td>
-    <td>Maria Anders</td>
-    <td>Germany</td>
-  </tr>
 	</tbody>
 </table>
