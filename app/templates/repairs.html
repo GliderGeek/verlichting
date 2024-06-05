@@ -65,11 +65,15 @@
 
 		for (let rowNumber = 0; rowNumber < repairs.results.length; rowNumber++) {
 
-			var values = [repairs.results[rowNumber].link, repairs.results[rowNumber].brand, repairs.results[rowNumber].model, repairs.results[rowNumber].kind]
+			var values = [repairs.results[rowNumber].link,
+			repairs.results[rowNumber].brand,
+			repairs.results[rowNumber].model,
+			repairs.results[rowNumber].kind,
+			repairs.results[rowNumber].repair_status]
 
 			var newRow = tbodyRef.insertRow();  // Insert a row at the end of table
 
-			for(let column = 0; column < 4; column++){
+			for(let column = 0; column < 5; column++){
 				var newCell = newRow.insertCell();                        // Insert a cell at the end of the row
 				if (column == 0){
 					var child = document.createElement('a');
@@ -189,6 +193,7 @@ number of items found:
 	<th>Brand</th>
     <th>Model</th>
     <th>Kind of product</th>
+    <th>Repaired?</th>
   </tr>
   </thead>
 	<tbody>
