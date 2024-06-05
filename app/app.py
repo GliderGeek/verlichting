@@ -193,10 +193,28 @@ def repairs():
 
 def serialize_row(row):
     return {
+        'repair_id': row["Repair id"],
+        'repair_date': row['Repair date'],
+        'repair_cafe_number': row["Repair Cafe number"],
+        'repair_cafe_name': row["Repair Cafe name"],
+        'country': row["Country"],
+        'kind': row['kind_of_product'],
+        'category': row['Category'],
         'brand': row['brand'],
         'model': row['model'],
-        'kind': row['kind_of_product'],
-        'repair_status': row['Has the product been repaired?']
+        'production_year': row['(Estimated) Year of production'],
+        'problem_description': row["Problem description + probable cause"],
+        'has_been_repaired': row['Has the product been repaired?'],
+        'defect_found': row['Defect found'],
+        'yes_repaired_actions': row["If yes: what did you do to repair it?"],
+        'half_repaired_actions': row["If half repaired: what did you do, what advice did you give?"],
+        'not_repaired_actions_list': row["If not repaired: why could you not repair it (list)?"],
+        'not_repaired_actions_open': row["If not repaired: why could you not repair it (open answer)?"],
+        'repairability': row["Reparability of product  (1 = difficult, 10 = easy)"],
+        'repair_info_used': row["Did you use repair information?"],
+        'location_repair_info': row["Where did this information come from?"],
+        'url_repair_info': row["Source repair information (url website)"],
+        'repair_suggestions': row["Do you have any suggestions for other repairers of this (or similar) product?"],
     }
 
 
