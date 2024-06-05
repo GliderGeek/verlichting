@@ -3,194 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-
-    <script>
-
-	function setDataListOptions(dataList, newOptions){
-            var options = dataList.getElementsByTagName('option');
-            while (dataList.options.length > 0){
-              dataList.removeChild(options[0]);
-            }
-            newOptions.forEach(function(item){
-                var option = document.createElement('option');
-                option.value = item;
-                dataList.appendChild(option);
-            });
-        };
-
-	async function updateBrandList(){
-      var brandList = document.getElementById("brands")
-	  var model = document.getElementById("selected_model").value
-      var kind = document.getElementById("selected_kind").value
-
-      var url = '/brands/?model=' + model + '&kind=' + kind
-      const response = await fetch(url);
-      const brandOptions = await response.json(); //extract JSON from the http response-->
-      setDataListOptions(brandList, brandOptions);
-	};
-
-	async function updateModelList(){
-
-	  var brand = document.getElementById("selected_brand").value
-	  var modelList = document.getElementById("models")
-      var kind = document.getElementById("selected_kind").value
-
-      var url = '/models/?brand=' + brand + '&kind=' + kind
-      const response = await fetch(url);
-      const modelOptions = await response.json(); //extract JSON from the http response-->
-      setDataListOptions(modelList, modelOptions);
-	};
-
-	async function updateKindList(){
-
-	  var kindList = document.getElementById("product_kinds")
-      var brand = document.getElementById("selected_brand").value
-	  var model = document.getElementById("selected_model").value
-
-      var url = '/kinds/?brand=' + brand + '&model=' + model
-      const response = await fetch(url);
-      const kindOptions = await response.json(); //extract JSON from the http response-->
-      setDataListOptions(kindList, kindOptions);
-	};
-
-	async function setRepairCount(brand, model, kind){
-		var url = '/repairs/?brand=' + brand + '&model=' + model + '&kind=' + kind
-        const response = await fetch(url);
-        const repairs = await response.json(); //extract JSON from the http response-->
-		document.getElementById("items_found").textContent = repairs.number_of_results;
-
-		var tbodyRef = document.getElementById('repairsTable').getElementsByTagName('tbody')[0];
-
-		tbodyRef.innerHTML = ''  //clear table
-
-		for (let rowNumber = 0; rowNumber < repairs.results.length; rowNumber++) {
-
-			var values = [repairs.results[rowNumber].link, repairs.results[rowNumber].brand, repairs.results[rowNumber].model, repairs.results[rowNumber].kind]
-
-			var newRow = tbodyRef.insertRow();  // Insert a row at the end of table
-
-			for(let column = 0; column < 4; column++){
-				var newCell = newRow.insertCell();                        // Insert a cell at the end of the row
-				if (column == 0){
-					var child = document.createElement('a');
-				    var linkText = document.createTextNode("link");
-				    child.appendChild(linkText);
-				    child.href = values[column];
-				} else {
-					var child = document.createTextNode(values[column]);    // Append a text node to the cell
-				}
-				newCell.appendChild(child);
-			}
-		}
-	};
-
-	async function triggerSingleRepair(){
-		var url = '/repairs/0418_2024_0511_240532'
-        const response = await fetch(url);
-        const repairs = await response.json(); //extract JSON from the http response-->
-        console.log(repairs);
-	};
-
-	function onBrandSelect(){
-
-		// todo: these "success" and "errors" are there to just wrap the asyn func. look into better way
-		updateModelList().then(
-			console.log("success"),
-			console.log("error"),
-		);
-		updateKindList().then(
-			console.log("success"),
-			console.log("error"),
-		);
-	};
-
-	function onModelSelect(){
-		updateBrandList().then(
-			console.log("success"),
-			console.log("error"),
-		);
-		updateKindList().then(
-			console.log("success"),
-			console.log("error"),
-		);
-	};
-
-	function onKindSelect(){
-		updateBrandList().then(
-			console.log("success"),
-			console.log("error"),
-		);
-		updateModelList().then(
-			console.log("success"),
-			console.log("error"),
-		);
-	};
-
-	function getRepairs(){
-		var brand = document.getElementById("selected_brand").value
-		var model = document.getElementById("selected_model").value
-		var kind = document.getElementById("selected_kind").value
-
-		setRepairCount(brand, model, kind).then(
-		    console.log("success"),
-		    console.log("error"),
-		);
-
-		triggerSingleRepair().then(
-		    console.log("success"),
-		    console.log("error"),
-		);
-
-	};
-
-
-</script>
 </head>
 <body>
 
-<h1>Repairs</h1>
+<h2>Brand</h2>
+{{ repair.brand }}
 
-	Brand: <br>
-	<input id="selected_brand" type="text" list="brands" onchange="onBrandSelect()"/>
-	<datalist id="brands">
-		{% for brand in brands %}
-		<tr>
-			<option value="{{ brand }}"></option>
-		</tr>
-		{% endfor %}
-	</datalist>
+<h2>Model</h2>
+{{ repair.model }}
 
-	<br>
+<h2>Kind of object</h2>
+{{ repair.kind }}
 
-	Model: <br>
-	<input id="selected_model" type="text" list="models" onchange="onModelSelect()"/>
-	<datalist id="models">
-	</datalist>
-	<br>
+<h2>Has it been repaired?</h2>
+{{ repair.repair_status }}
 
-	Kind of object: <br>
-	<input id="selected_kind" type="text" list="product_kinds" onchange="onKindSelect()"/>
-	<datalist id="product_kinds">
-	</datalist>
 
-	<br>
-	<br>
+{% if repair.repair_status == "yes"  %}
+    <h2> What did you do to repair it? </h2>
+    {{ repair.yes_repaired_actions }}
+{% elif repair.repair_status == "half" %}
+    <h2> What did you do, what advice did you give?</h2>
+    {{ repair.half_repaired_actions }}
+{% elif repair.repair_status == "no" %}
+    <h2> Why could you not repair it?</h2>
+    {{ repair.not_repaired_actions_list }}<br>
+    {{ repair.not_repaired_actions_open }}
+{% else %}
+{% endif %}
 
-<input id="clickMe" type="button" value="clickme" onclick="getRepairs()" /><br>
+<h2>Did you use repair information?</h2>
+{{ repair.repair_info_used }} <br>
 
-<br>
-number of items found:
-<div id="items_found">0</div>
+{% if repair.repair_info_used == "yes" %}
+{{ repair.location_repair_info}} <br>
+{{ repair.url_repair_info }}
+{% else %}
+{% endif %}
 
-<table id="repairsTable">
-	<thead>
-  <tr>
-    <th>Link</th>
-	<th>Brand</th>
-    <th>Model</th>
-    <th>Kind of product</th>
-  </tr>
-  </thead>
-	<tbody>
-	</tbody>
-</table>
+<h2>Do you have any suggestions for other repairers of this (or similar) product?</h2>
+{{ repair.repair_suggestions }}
+
+
+</body>
+</html>

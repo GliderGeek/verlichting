@@ -159,7 +159,7 @@ def repair():
     # - resultaten echt tonen
     # - is performance afhankelijke opties goed genoeg?
 
-    return render_template('repair.html', brands=brands, models=models, product_kinds=product_kinds)
+    return render_template('repairs.html', brands=brands, models=models, product_kinds=product_kinds)
 
 
 @app.route('/repairs/')
@@ -204,7 +204,7 @@ def serialize_row(row):
         'model': row['model'],
         'production_year': row['(Estimated) Year of production'],
         'problem_description': row["Problem description + probable cause"],
-        'has_been_repaired': row['Has the product been repaired?'],
+        'repair_status': row['Has the product been repaired?'],
         'defect_found': row['Defect found'],
         'yes_repaired_actions': row["If yes: what did you do to repair it?"],
         'half_repaired_actions': row["If half repaired: what did you do, what advice did you give?"],
@@ -228,6 +228,7 @@ def repair_item(repair_id):
     if len(results) == 0:
         return 'not found'
     elif len(results) == 1:
-        return serialize_row(results[0])
+        serialized_repair = serialize_row(results[0])
+        return render_template('repair.html', repair=serialized_repair)
     else:
         raise ValueError('multiple')
