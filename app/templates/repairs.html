@@ -53,8 +53,9 @@
       setDataListOptions(kindList, kindOptions);
 	};
 
-	async function setRepairCount(brand, model, kind){
-		var url = '/repairs/?brand=' + brand + '&model=' + model + '&kind=' + kind
+	async function setRepairs(brand, model, kind, page){
+		console.log("start");
+		var url = '/repairs/?brand=' + brand + '&model=' + model + '&kind=' + kind +'&page=' + page
         const response = await fetch(url);
         const repairs = await response.json(); //extract JSON from the http response-->
 		document.getElementById("items_found").textContent = repairs.number_of_results;
@@ -86,6 +87,7 @@
 				newCell.appendChild(child);
 			}
 		}
+		console.log("end");
 	};
 
 	async function triggerSingleRepair(){
@@ -130,27 +132,76 @@
 		);
 	};
 
+	function setPageNumber(pageNumber){
+		document.getElementById("pageNumber").value = pageNumber;
+	};
+
+	function getPageNumber(){
+		return Number(document.getElementById("pageNumber").value)
+	};
+
+	function setPageRange(pageNumber){
+		document.getElementById("firstItemNumber").textContent = (pageNumber-1) * 10 + 1;
+		document.getElementById("lastItemNumber").textContent = pageNumber*10;
+	};
+
+
 	function getRepairs(){
 		var brand = document.getElementById("selected_brand").value
 		var model = document.getElementById("selected_model").value
 		var kind = document.getElementById("selected_kind").value
 
-		setRepairCount(brand, model, kind).then(
+		var pageNumber = 0;
+
+		setRepairs(brand, model, kind, pageNumber).then(
 		    console.log("success"),
 		    console.log("error"),
 		);
 
-		triggerSingleRepair().then(
+		setPageNumber(1);
+
+	};
+
+	function nextPage(){
+		var pageNumber = getPageNumber();
+		console.log(pageNumber);
+
+
+		var brand = document.getElementById("selected_brand").value
+		var model = document.getElementById("selected_model").value
+		var kind = document.getElementById("selected_kind").value
+
+		setRepairs(brand, model, kind, pageNumber + 1).then(
 		    console.log("success"),
 		    console.log("error"),
 		);
 
+		setPageNumber(pageNumber + 1);
+		setPageRange(pageNumber + 1);
+
+	};
+
+	function previousPage(){
+		var pageNumber = getPageNumber();
+		console.log(pageNumber);
+
+
+		var brand = document.getElementById("selected_brand").value
+		var model = document.getElementById("selected_model").value
+		var kind = document.getElementById("selected_kind").value
+
+		setRepairs(brand, model, kind, pageNumber - 1).then(
+		    console.log("success"),
+		    console.log("error"),
+		);
+
+		setPageNumber(pageNumber - 1);
+		setPageRange(pageNumber - 1);
 	};
 
 
 </script>
 </head>
-<body>
 
 <h1>Repairs</h1>
 
@@ -183,8 +234,15 @@
 <input id="clickMe" type="button" value="clickme" onclick="getRepairs()" /><br>
 
 <br>
-number of items found:
-<div id="items_found">0</div>
+
+page <input id="pageNumber" type="number" hidden/>
+<span>
+	<span id="firstItemNumber">1</span> -
+	<span id="lastItemNumber">10</span>
+	(<span id="items_found">0</span> total)
+</span><br>
+<input id="previousPage" type="button" value="previous" onclick="previousPage()" />
+<input id="nextPage" type="button" value="next" onclick="nextPage()" /><br>
 
 <table id="repairsTable">
 	<thead>

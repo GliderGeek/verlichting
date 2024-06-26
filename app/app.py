@@ -99,6 +99,14 @@ def filter(**kwargs):
     return filter_clause
 
 
+def paginate(page):
+    PAGE_SIZE=10
+    if page in ('', None) or page <= 1:
+        return f'LIMIT {PAGE_SIZE}'
+    else:
+        return f'LIMIT {PAGE_SIZE} OFFSET {(int(page)-1) * PAGE_SIZE}'
+
+
 @app.route('/brands/')
 def brands():
 
@@ -161,7 +169,6 @@ def repair():
 
     return render_template('repairs.html', brands=brands, models=models, product_kinds=product_kinds)
 
-
 @app.route('/repairs/')
 def repairs():
 
@@ -169,12 +176,15 @@ def repairs():
     brand = request.args.get('brand')
     model = request.args.get('model')
     kind_of_product = request.args.get('kind')
+    page = request.args.get('page')
     if brand not in (None, ''):
         filters['brand'] = brand
     if model not in (None, ''):
         filters['model'] = model
     if kind_of_product not in (None, ''):
         filters['kind_of_product'] = kind_of_product
+    if page not in (None, ''):
+        page = int(page)
 
     # todo: address sql injection vuln
     query = f"SELECT COUNT(*) FROM repairs {filter(**filters)}"
@@ -182,7 +192,7 @@ def repairs():
     res = query_repair_db(query)
     number_of_results = (res[0]['COUNT(*)'])
 
-    first_ten_query = f"SELECT brand, model, kind_of_product, [Repair id], [Has the product been repaired?] FROM repairs {filter(**filters)} LIMIT 10"
+    first_ten_query = f"SELECT brand, model, kind_of_product, [Repair id], [Has the product been repaired?] FROM repairs {filter(**filters)} {paginate(page)}"
     results = [{'brand': row['brand'],
                 'model': row['model'],
                 'kind': row['kind_of_product'],
