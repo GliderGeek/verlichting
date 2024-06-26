@@ -132,19 +132,15 @@
 		);
 	};
 
-	function setPageNumber(pageNumber){
-		document.getElementById("pageNumber").value = pageNumber;
-	};
-
 	function getPageNumber(){
 		return Number(document.getElementById("pageNumber").value)
 	};
 
-	function setPageRange(pageNumber){
+	function setPage(pageNumber){
+		document.getElementById("pageNumber").value = pageNumber;
 		document.getElementById("firstItemNumber").textContent = (pageNumber-1) * 10 + 1;
 		document.getElementById("lastItemNumber").textContent = pageNumber*10;
 	};
-
 
 	function getRepairs(){
 		var brand = document.getElementById("selected_brand").value
@@ -158,8 +154,7 @@
 		    console.log("error"),
 		);
 
-		setPageNumber(1);
-
+		setPage(1);
 	};
 
 	function nextPage(){
@@ -176,9 +171,7 @@
 		    console.log("error"),
 		);
 
-		setPageNumber(pageNumber + 1);
-		setPageRange(pageNumber + 1);
-
+		setPage(pageNumber + 1);
 	};
 
 	function previousPage(){
@@ -195,8 +188,7 @@
 		    console.log("error"),
 		);
 
-		setPageNumber(pageNumber - 1);
-		setPageRange(pageNumber - 1);
+		setPage(pageNumber - 1);
 	};
 
 
