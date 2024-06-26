@@ -162,11 +162,6 @@ def repair():
     brands = [row['brand'] for row in query_repair_db('SELECT DISTINCT brand FROM repairs ORDER BY brand ASC ')]
     models = [row['model'] for row in query_repair_db('SELECT DISTINCT model FROM repairs ORDER BY model ASC ')]
     product_kinds = [row['kind_of_product'] for row in query_repair_db('SELECT DISTINCT kind_of_product FROM repairs ORDER BY kind_of_product ASC ')]
-
-    # todo
-    # - resultaten echt tonen
-    # - is performance afhankelijke opties goed genoeg?
-
     return render_template('repairs.html', brands=brands, models=models, product_kinds=product_kinds)
 
 @app.route('/repairs/')
@@ -185,6 +180,8 @@ def repairs():
         filters['kind_of_product'] = kind_of_product
     if page not in (None, ''):
         page = int(page)
+
+    # todo: add posibility to add filter on repair tips
 
     # todo: address sql injection vuln
     query = f"SELECT COUNT(*) FROM repairs {filter(**filters)}"
