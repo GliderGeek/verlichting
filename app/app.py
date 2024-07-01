@@ -90,12 +90,17 @@ def filter(**kwargs):
         first = True
         for key, val in kwargs.items():
             if first:
-                filter_clause = filter_clause + f"WHERE {key}='{val}'"
+                if val == 'NOTNULL':
+                    filter_clause = filter_clause + f"WHERE [{key}] IS NOT NULL"
+                else:
+                    filter_clause = filter_clause + f"WHERE [{key}]='{val}'"
                 first = False
-                print('here1')
             else:
-                filter_clause = filter_clause + f" AND {key}='{val}'"
-                print('here2')
+                if val == 'NOTNULL':
+                    filter_clause = filter_clause + f" AND [{key}] IS NOT NULL"
+                else:
+                    filter_clause = filter_clause + f" AND [{key}]='{val}'"
+
     return filter_clause
 
 
@@ -172,6 +177,8 @@ def repairs():
     model = request.args.get('model')
     kind_of_product = request.args.get('kind')
     page = request.args.get('page')
+    repair_info = request.args.get('repair_info')
+    suggestions = request.args.get('suggestions')
     if brand not in (None, ''):
         filters['brand'] = brand
     if model not in (None, ''):
@@ -180,6 +187,11 @@ def repairs():
         filters['kind_of_product'] = kind_of_product
     if page not in (None, ''):
         page = int(page)
+    if repair_info == 'true':
+        filters["Did you use repair information?"] = 'yes'
+    # print('suggestions', suggestions)
+    if suggestions == 'true':
+        filters["Do you have any suggestions for other repairers of this (or similar) product?"] = 'NOTNULL'
 
     # todo: add posibility to add filter on repair tips
 

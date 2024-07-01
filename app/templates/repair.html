@@ -21,14 +21,14 @@
 
 {% if repair.repair_status == "yes"  %}
     <h2> What did you do to repair it? </h2>
-    {{ repair.yes_repaired_actions }}
+    Actions: {{ repair.yes_repaired_actions }}
 {% elif repair.repair_status == "half" %}
     <h2> What did you do, what advice did you give?</h2>
-    {{ repair.half_repaired_actions }}
+    Actions: {{ repair.half_repaired_actions }}
 {% elif repair.repair_status == "no" %}
     <h2> Why could you not repair it?</h2>
     {{ repair.not_repaired_actions_list }}<br>
-    {{ repair.not_repaired_actions_open }}
+    Actions: {{ repair.not_repaired_actions_open }}
 {% else %}
 {% endif %}
 
@@ -36,8 +36,8 @@
 {{ repair.repair_info_used }} <br>
 
 {% if repair.repair_info_used == "yes" %}
-{{ repair.location_repair_info}} <br>
-{{ repair.url_repair_info }}
+source: {{ repair.location_repair_info}} <br>
+URL: {{ repair.url_repair_info }}
 {% else %}
 {% endif %}
 

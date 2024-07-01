@@ -53,9 +53,9 @@
       setDataListOptions(kindList, kindOptions);
 	};
 
-	async function setRepairs(brand, model, kind, page){
+	async function setRepairs(brand, model, kind, repair_info, suggestions, page){
 		console.log("start");
-		var url = '/repairs/?brand=' + brand + '&model=' + model + '&kind=' + kind +'&page=' + page
+		var url = '/repairs/?brand=' + brand + '&model=' + model + '&kind=' + kind + '&repair_info=' + repair_info + '&suggestions=' + suggestions + '&page=' + page
         const response = await fetch(url);
         const repairs = await response.json(); //extract JSON from the http response-->
 		document.getElementById("items_found").textContent = repairs.number_of_results;
@@ -147,9 +147,12 @@
 		var model = document.getElementById("selected_model").value
 		var kind = document.getElementById("selected_kind").value
 
+		var repair_info = document.getElementById("repair_info").checked
+		var suggestions = document.getElementById("suggestions").checked
+
 		var pageNumber = 0;
 
-		setRepairs(brand, model, kind, pageNumber).then(
+		setRepairs(brand, model, kind, repair_info, suggestions, pageNumber).then(
 		    console.log("success"),
 		    console.log("error"),
 		);
@@ -166,7 +169,10 @@
 		var model = document.getElementById("selected_model").value
 		var kind = document.getElementById("selected_kind").value
 
-		setRepairs(brand, model, kind, pageNumber + 1).then(
+		var repair_info = document.getElementById("repair_info").checked
+		var suggestions = document.getElementById("suggestions").checked
+
+		setRepairs(brand, model, kind, repair_info, suggestions, pageNumber + 1).then(
 		    console.log("success"),
 		    console.log("error"),
 		);
@@ -220,6 +226,10 @@
 	<datalist id="product_kinds">
 	</datalist>
 
+	<br>
+	<br>
+	<input type="checkbox" id="repair_info" value="repair_info"/><label for="repair_info">Repair info used</label><br>
+<input type="checkbox" id="suggestions" value="suggestions"/><label for="suggestions">Repair suggestions</label>
 	<br>
 	<br>
 
