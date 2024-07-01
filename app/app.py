@@ -124,9 +124,6 @@ def brands():
         filters['kind_of_product'] = kind_of_product
 
     query = f'SELECT DISTINCT brand FROM repairs {filter(**filters)} ORDER BY brand ASC '
-
-    print(query)
-
     return jsonify([row['brand'] for row in query_repair_db(query)])
 
 
@@ -142,9 +139,6 @@ def models():
         filters['kind_of_product'] = kind_of_product
 
     query = f'SELECT DISTINCT model FROM repairs {filter(**filters)} ORDER BY model ASC '
-
-    print('query:', query)
-
     return jsonify([row['model'] for row in query_repair_db(query)])
 
 
@@ -189,11 +183,8 @@ def repairs():
         page = int(page)
     if repair_info == 'true':
         filters["Did you use repair information?"] = 'yes'
-    # print('suggestions', suggestions)
     if suggestions == 'true':
         filters["Do you have any suggestions for other repairers of this (or similar) product?"] = 'NOTNULL'
-
-    # todo: add posibility to add filter on repair tips
 
     # todo: address sql injection vuln
     query = f"SELECT COUNT(*) FROM repairs {filter(**filters)}"
@@ -244,7 +235,6 @@ def repair_item(repair_id):
     query = f"SELECT * FROM repairs WHERE [Repair id]='{repair_id}'"
     results = [row for row in query_repair_db(query)]
 
-    print(len(results))
     if len(results) == 0:
         return 'not found'
     elif len(results) == 1:
