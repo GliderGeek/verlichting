@@ -161,6 +161,7 @@ def repair():
     brands = [row['brand'] for row in query_repair_db('SELECT DISTINCT brand FROM repairs ORDER BY brand ASC ')]
     models = [row['model'] for row in query_repair_db('SELECT DISTINCT model FROM repairs ORDER BY model ASC ')]
     product_kinds = [row['kind_of_product'] for row in query_repair_db('SELECT DISTINCT kind_of_product FROM repairs ORDER BY kind_of_product ASC ')]
+    # todo: split out js into separate file
     return render_template('repairs.html', brands=brands, models=models, product_kinds=product_kinds)
 
 @app.route('/repairs/')
@@ -242,3 +243,13 @@ def repair_item(repair_id):
         return render_template('repair.html', repair=serialized_repair)
     else:
         raise ValueError('multiple')
+
+
+@app.route('/createExcel/', methods = ['POST'])
+def create_excel():
+
+    # request.data is bytes
+    with open('received.pdf', 'wb') as f:
+        f.write(request.data)
+
+    return 'success'
