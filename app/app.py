@@ -252,11 +252,10 @@ def create_excel():
     with open('received.pdf', 'wb') as f:
         f.write(request.data)
 
-    with open('test.xlsx', 'rb') as f:
-        return send_file(
-            f, 
-            as_attachment=True,
-            download_name='test.xlsx',
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return send_file(
+        'test.xlsx', 
+        as_attachment=True,
+        download_name='test.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     
     return 'unexpected'
