@@ -253,6 +253,6 @@ def create_excel():
         f.write(request.data)
 
     with open('test.xlsx', 'rb') as f:
-        return send_file(f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')xlsx_content = f.read()
+        return send_file(f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     
     return 'unexpected'
