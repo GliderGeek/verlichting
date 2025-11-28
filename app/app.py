@@ -3,7 +3,7 @@ import sqlite3
 
 from pathlib import Path
 
-from flask import Flask, render_template, g, redirect, url_for, request, jsonify
+from flask import Flask, render_template, g, redirect, url_for, request, jsonify, send_file
 from werkzeug.exceptions import abort
 
 app = Flask(__name__)
@@ -252,4 +252,7 @@ def create_excel():
     with open('received.pdf', 'wb') as f:
         f.write(request.data)
 
-    return 'success'
+    with open('test.xlsx', 'rb') as f:
+        return send_file(f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')xlsx_content = f.read()
+    
+    return 'unexpected'
