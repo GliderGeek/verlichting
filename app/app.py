@@ -1,10 +1,12 @@
 import json
 import sqlite3
+import os
 
 from pathlib import Path
 
 from flask import Flask, render_template, g, redirect, url_for, request, jsonify, send_file
 from werkzeug.exceptions import abort
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
@@ -12,6 +14,7 @@ DATABASE = Path(__file__).parent / 'trips.sqlite'
 
 REPAIR_DB = Path(__file__).parent / 'repairdata.sqlite'
 
+load_dotenv()
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -248,6 +251,14 @@ def repair_item(repair_id):
 @app.route('/createExcel/', methods = ['POST'])
 def create_excel():
 
+    CREATE_EXCEL_SECRET = os.environ.get('CREATE_EXCEL_SECRET')
+    if not CREATE_EXCEL_SECRET:
+        raise EnvironmentError('Secret not set')
+    
+    incoming_create_excel_secret = request.headers.get('secret')
+    if not incoming_create_excel_secret or incoming_create_excel_secret != CREATE_EXCEL_SECRET:
+        return "Method Not Allowed", 405
+
     # request.data is bytes
     with open('received.pdf', 'wb') as f:
         f.write(request.data)
@@ -257,5 +268,3 @@ def create_excel():
         as_attachment=True,
         download_name='test.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    
-    return 'unexpected'
