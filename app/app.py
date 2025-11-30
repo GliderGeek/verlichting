@@ -1,8 +1,11 @@
 import json
 import sqlite3
 import os
+import io
 
 from pathlib import Path
+
+from functions import convert_pdf_to_excel
 
 from flask import Flask, render_template, g, redirect, url_for, request, jsonify, send_file
 from werkzeug.exceptions import abort
@@ -260,11 +263,18 @@ def create_excel():
         return "Method Not Allowed", 405
 
     # request.data is bytes
-    with open('received.pdf', 'wb') as f:
-        f.write(request.data)
+    # with open('received.pdf', 'wb') as f:
+    #     f.write(request.data)
+
+    pdf_bytesio = io.BytesIO(request.data)
+
+    spreadsheet = convert_pdf_to_excel(pdf_bytesio)
+
+    with open("groceries.xlsx", "wb") as f:
+        f.write(spreadsheet.getbuffer())
 
     return send_file(
-        'test.xlsx', 
+        'groceries.xlsx', 
         as_attachment=True,
-        download_name='test.xlsx',
+        download_name='groceries.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
