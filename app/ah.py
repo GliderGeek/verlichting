@@ -6,7 +6,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 
-def convert_pdf_to_excel(pdf: io.BytesIO) -> io.BytesIO:
+def convert_ah_pdf_to_excel(pdf: io.BytesIO) -> io.BytesIO:
+    """
+    Convert AH receipt in PDF to excel, such that you can devide cost
+    """
 
     def append(ws, values, font = None):
         """My version of openpyxl append with font"""

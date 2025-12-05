@@ -5,7 +5,7 @@ import io
 
 from pathlib import Path
 
-from functions import convert_pdf_to_excel
+from app.ah import convert_ah_pdf_to_excel
 
 from flask import Flask, render_template, g, redirect, url_for, request, jsonify, send_file
 from werkzeug.exceptions import abort
@@ -256,22 +256,18 @@ def create_excel():
 
     CREATE_EXCEL_SECRET = os.environ.get('CREATE_EXCEL_SECRET')
     if not CREATE_EXCEL_SECRET:
-        raise EnvironmentError('Secret not set')
+        raise EnvironmentError('CREATE_EXCEL_SECRET secret not set')
     
     incoming_create_excel_secret = request.headers.get('secret')
     if not incoming_create_excel_secret or incoming_create_excel_secret != CREATE_EXCEL_SECRET:
         return "Method Not Allowed", 405
 
-    # request.data is bytes
-    # with open('received.pdf', 'wb') as f:
-    #     f.write(request.data)
-
     pdf_bytesio = io.BytesIO(request.data)
 
-    spreadsheet = convert_pdf_to_excel(pdf_bytesio)
+    spreadsheet_bytesio = convert_ah_pdf_to_excel(pdf_bytesio)
 
     with open("groceries.xlsx", "wb") as f:
-        f.write(spreadsheet.getbuffer())
+        f.write(spreadsheet_bytesio.getbuffer())
 
     return send_file(
         'groceries.xlsx', 
