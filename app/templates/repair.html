@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h2>Brand</h2>
+{{ repair.brand }}
+
+<h2>Model</h2>
+{{ repair.model }}
+
+<h2>Kind of object</h2>
+{{ repair.kind }}
+
+<h2>Has it been repaired?</h2>
+{{ repair.repair_status }}
+
+
+{% if repair.repair_status == "yes"  %}
+    <h2> What did you do to repair it? </h2>
+    Actions: {{ repair.yes_repaired_actions }}
+{% elif repair.repair_status == "half" %}
+    <h2> What did you do, what advice did you give?</h2>
+    Actions: {{ repair.half_repaired_actions }}
+{% elif repair.repair_status == "no" %}
+    <h2> Why could you not repair it?</h2>
+    {{ repair.not_repaired_actions_list }}<br>
+    Actions: {{ repair.not_repaired_actions_open }}
+{% else %}
+{% endif %}
+
+<h2>Did you use repair information?</h2>
+{{ repair.repair_info_used }} <br>
+
+{% if repair.repair_info_used == "yes" %}
+source: {{ repair.location_repair_info}} <br>
+URL: {{ repair.url_repair_info }}
+{% else %}
+{% endif %}
+
+<h2>Do you have any suggestions for other repairers of this (or similar) product?</h2>
+{{ repair.repair_suggestions }}
+
+
+</body>
+</html>

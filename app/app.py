@@ -1,15 +1,23 @@
 import json
 import sqlite3
+import os
+import io
 
 from pathlib import Path
 
-from flask import Flask, render_template, g, redirect, url_for
+from ah import convert_ah_pdf_to_excel
+
+from flask import Flask, render_template, g, redirect, url_for, request, jsonify, send_file
 from werkzeug.exceptions import abort
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
 DATABASE = Path(__file__).parent / 'trips.sqlite'
 
+REPAIR_DB = Path(__file__).parent / 'repairdata.sqlite'
+
+load_dotenv()
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -20,12 +28,26 @@ def get_db():
     return db
 
 
+def get_repair_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(REPAIR_DB)
+    db.row_factory = sqlite3.Row
+    return db
+
+
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
+
+def query_repair_db(query, args=(), one=False):
+    cur = get_repair_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
 
 @app.route('/')
 def index():
@@ -66,3 +88,189 @@ def trip(trip_name=None):
     }
 
     return render_template('trip.html', active_page='trips', **context)
+
+
+def filter(**kwargs):
+    filter_clause = ''
+    if len(kwargs) > 0:
+        first = True
+        for key, val in kwargs.items():
+            if first:
+                if val == 'NOTNULL':
+                    filter_clause = filter_clause + f"WHERE [{key}] IS NOT NULL"
+                else:
+                    filter_clause = filter_clause + f"WHERE [{key}]='{val}'"
+                first = False
+            else:
+                if val == 'NOTNULL':
+                    filter_clause = filter_clause + f" AND [{key}] IS NOT NULL"
+                else:
+                    filter_clause = filter_clause + f" AND [{key}]='{val}'"
+
+    return filter_clause
+
+
+def paginate(page):
+    PAGE_SIZE=10
+    if page in ('', None) or page <= 1:
+        return f'LIMIT {PAGE_SIZE}'
+    else:
+        return f'LIMIT {PAGE_SIZE} OFFSET {(int(page)-1) * PAGE_SIZE}'
+
+
+@app.route('/brands/')
+def brands():
+
+    filters = {}
+    model = request.args.get('model')
+    kind_of_product = request.args.get('kind')
+    if model not in (None, ''):
+        filters['model'] = model
+    if kind_of_product not in (None, ''):
+        filters['kind_of_product'] = kind_of_product
+
+    query = f'SELECT DISTINCT brand FROM repairs {filter(**filters)} ORDER BY brand ASC '
+    return jsonify([row['brand'] for row in query_repair_db(query)])
+
+
+@app.route('/models/')
+def models():
+
+    filters = {}
+    brand = request.args.get('brand')
+    kind_of_product = request.args.get('kind')
+    if brand not in (None, ''):
+        filters['brand'] = brand
+    if kind_of_product not in (None, ''):
+        filters['kind_of_product'] = kind_of_product
+
+    query = f'SELECT DISTINCT model FROM repairs {filter(**filters)} ORDER BY model ASC '
+    return jsonify([row['model'] for row in query_repair_db(query)])
+
+
+@app.route('/kinds/')
+def kinds():
+    filters = {}
+    brand = request.args.get('brand')
+    model = request.args.get('model')
+    if brand not in (None, ''):
+        filters['brand'] = brand
+    if model not in (None, ''):
+        filters['model'] = model
+
+    query = f'SELECT DISTINCT kind_of_product FROM repairs {filter(**filters)} ORDER BY kind_of_product ASC '
+    return jsonify([row['kind_of_product'] for row in query_repair_db(query)])
+
+
+@app.route('/repair/')
+def repair():
+    brands = [row['brand'] for row in query_repair_db('SELECT DISTINCT brand FROM repairs ORDER BY brand ASC ')]
+    models = [row['model'] for row in query_repair_db('SELECT DISTINCT model FROM repairs ORDER BY model ASC ')]
+    product_kinds = [row['kind_of_product'] for row in query_repair_db('SELECT DISTINCT kind_of_product FROM repairs ORDER BY kind_of_product ASC ')]
+    # todo: split out js into separate file
+    return render_template('repairs.html', brands=brands, models=models, product_kinds=product_kinds)
+
+@app.route('/repairs/')
+def repairs():
+
+    filters = {}
+    brand = request.args.get('brand')
+    model = request.args.get('model')
+    kind_of_product = request.args.get('kind')
+    page = request.args.get('page')
+    repair_info = request.args.get('repair_info')
+    suggestions = request.args.get('suggestions')
+    if brand not in (None, ''):
+        filters['brand'] = brand
+    if model not in (None, ''):
+        filters['model'] = model
+    if kind_of_product not in (None, ''):
+        filters['kind_of_product'] = kind_of_product
+    if page not in (None, ''):
+        page = int(page)
+    if repair_info == 'true':
+        filters["Did you use repair information?"] = 'yes'
+    if suggestions == 'true':
+        filters["Do you have any suggestions for other repairers of this (or similar) product?"] = 'NOTNULL'
+
+    # todo: address sql injection vuln
+    query = f"SELECT COUNT(*) FROM repairs {filter(**filters)}"
+
+    res = query_repair_db(query)
+    number_of_results = (res[0]['COUNT(*)'])
+
+    first_ten_query = f"SELECT brand, model, kind_of_product, [Repair id], [Has the product been repaired?] FROM repairs {filter(**filters)} {paginate(page)}"
+    results = [{'brand': row['brand'],
+                'model': row['model'],
+                'kind': row['kind_of_product'],
+                'link': f"/repairs/{row['Repair id']}",
+                'repair_status': row['Has the product been repaired?']
+                } for row in query_repair_db(first_ten_query)]
+    return {'number_of_results': number_of_results, 'page_size': 10, 'results': results}
+
+
+def serialize_row(row):
+    return {
+        'repair_id': row["Repair id"],
+        'repair_date': row['Repair date'],
+        'repair_cafe_number': row["Repair Cafe number"],
+        'repair_cafe_name': row["Repair Cafe name"],
+        'country': row["Country"],
+        'kind': row['kind_of_product'],
+        'category': row['Category'],
+        'brand': row['brand'],
+        'model': row['model'],
+        'production_year': row['(Estimated) Year of production'],
+        'problem_description': row["Problem description + probable cause"],
+        'repair_status': row['Has the product been repaired?'],
+        'defect_found': row['Defect found'],
+        'yes_repaired_actions': row["If yes: what did you do to repair it?"],
+        'half_repaired_actions': row["If half repaired: what did you do, what advice did you give?"],
+        'not_repaired_actions_list': row["If not repaired: why could you not repair it (list)?"],
+        'not_repaired_actions_open': row["If not repaired: why could you not repair it (open answer)?"],
+        'repairability': row["Reparability of product  (1 = difficult, 10 = easy)"],
+        'repair_info_used': row["Did you use repair information?"],
+        'location_repair_info': row["Where did this information come from?"],
+        'url_repair_info': row["Source repair information (url website)"],
+        'repair_suggestions': row["Do you have any suggestions for other repairers of this (or similar) product?"],
+    }
+
+
+@app.route('/repairs/<repair_id>')
+def repair_item(repair_id):
+    # todo: change into column name without space
+    query = f"SELECT * FROM repairs WHERE [Repair id]='{repair_id}'"
+    results = [row for row in query_repair_db(query)]
+
+    if len(results) == 0:
+        return 'not found'
+    elif len(results) == 1:
+        serialized_repair = serialize_row(results[0])
+        return render_template('repair.html', repair=serialized_repair)
+    else:
+        raise ValueError('multiple')
+
+
+@app.route('/createExcel/', methods = ['POST'])
+def create_excel():
+
+    CREATE_EXCEL_SECRET = os.environ.get('CREATE_EXCEL_SECRET')
+    if not CREATE_EXCEL_SECRET:
+        raise EnvironmentError('CREATE_EXCEL_SECRET secret not set')
+    
+    incoming_create_excel_secret = request.headers.get('secret')
+    if not incoming_create_excel_secret or incoming_create_excel_secret != CREATE_EXCEL_SECRET:
+        return "Method Not Allowed", 405
+
+    pdf_bytesio = io.BytesIO(request.data)
+
+    spreadsheet_bytesio = convert_ah_pdf_to_excel(pdf_bytesio)
+
+    with open("groceries.xlsx", "wb") as f:
+        f.write(spreadsheet_bytesio.getbuffer())
+
+    return send_file(
+        'groceries.xlsx', 
+        as_attachment=True,
+        download_name='groceries.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
